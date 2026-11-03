@@ -15,20 +15,20 @@ class MLP(nn.Module):
         self.context_size = context_size
         self.embed = nn.Embedding(vocab_size, embed_dim)
         num_features = context_size * embed_dim
-        # input layer
-        self.W_1 = Parameter(init.xavier_normal_(torch.empty(num_hidden, num_features)))
-        self.b_1 = Parameter(torch.zeros(num_hidden))
-        # hidden layer
-        self.W_2 = Parameter(init.xavier_normal_(torch.empty(vocab_size, num_hidden)))
-        self.b_2 = Parameter(torch.zeros(vocab_size))
-        # define activation function in constructor
+        # input layer L1 + hidden layer H1
+        self.L1 = nn.Linear(num_features, num_hidden)
+        self.H1 = nn.Linear(num_hidden, num_hidden)
+        # output layer O1
+        self.O1 = nn.Linear(num_hidden, vocab_size)
         self.activation = torch.nn.ELU()
 
     def forward(self, context):
         x = self.embed(context).flatten(1)
-        x = F.linear(x, self.W_1, self.b_1)
+        x = self.L1(x)
         x = self.activation(x)
-        x = F.linear(x, self.W_2, self.b_2)
+        x = self.H1(x)
+        x = self.activation(x)
+        x = self.O1(x)
         return x
 
     def count_parameters(self):
