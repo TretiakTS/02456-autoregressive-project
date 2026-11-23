@@ -8,15 +8,15 @@ from torch.utils.data import DataLoader
 
 from protgen.data import ProteinDataset
 from protgen.data.make_data import IGNORE_INDEX
-from protgen.models.rnn import RNN
+from protgen.models.rnn import GRU
 
 
 class RNNClassifier(nn.Module):
-    def __init__(self, pretrained_rnn: RNN, num_families = 3):
+    def __init__(self, pretrained_rnn: GRU, num_families = 3):
         super(RNNClassifier, self).__init__()
         self.embed = pretrained_rnn.embed
         self.embed.requires_grad_(False) 
-        self.pretrained_rnn = pretrained_rnn.rnn
+        self.pretrained_rnn = pretrained_rnn.GRU
         self.pretrained_rnn.requires_grad_(False) # freeze weights of the pretrained RNN
         self.family_clasification_head = nn.Linear(self.pretrained_rnn.hidden_size, num_families) 
         self.classification_head_output = torch.nn.LogSoftmax(dim=-1)
@@ -65,7 +65,7 @@ def evaluate_classifier(model, val_loader, device):
 
 if __name__ == "__main__":
 
-    rnn = RNN()
+    rnn = GRU()
 
     ROOT = Path(__file__).resolve().parents[3]
     DATA_DIR = ROOT / "data"
