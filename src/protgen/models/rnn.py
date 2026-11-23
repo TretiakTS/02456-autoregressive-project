@@ -18,10 +18,10 @@ RESULTS_DIR = ROOT / "results"
 
 class GRU(nn.Module):
 
-    def __init__(self, vocab_size=23, embed_dim=8, hidden_size=hidden_size, hidden_layer=hidden_layer):
+    def __init__(self, vocab_size=23, embed_dim=8, hidden_size=64, num_layers=1):
         super(GRU, self).__init__()
         self.embed = nn.Embedding(vocab_size, embed_dim)
-        self.GRU = torch.nn.GRU(embed_dim, hidden_size=hidden_size, hidden_layer=hidden_layer, batch_first=True)
+        self.GRU = torch.nn.GRU(embed_dim, hidden_size=hidden_size, num_layers=num_layers, batch_first=True)
         self.output = nn.Linear(hidden_size, vocab_size)
         self.activation_output = torch.nn.LogSoftmax(dim=-1)
 
@@ -69,13 +69,13 @@ if __name__ == "__main__":
     val_loader = DataLoader(val_data, batch_size=32, shuffle=False)
     print(f"Training examples: {len(train_data):,}")
     print(f"Training batches per epoch: {len(train_loader):,}")
-    epoch_run = np.logspace([5,10,20])
-    learning_rate_runs = np.logspace([1e-1,1e-2,1e-3] )
+    epoch_run = [5,10,20]
+    learning_rate_runs = [1e-1,1e-2,1e-3]
     hidden_size_runs = [64,128]
-    hidden_layer_run = ([1,2])
+    hidden_layer_run = [1,2]
     param_grid = {'epoch': epoch_run,
                   'lr': learning_rate_runs,
-                  'hidden_size ': hidden_size_runs,
+                  'hidden_size': hidden_size_runs,
                   'hidden_layer': hidden_layer_run}
     device = torch.device("cpu")
     print("modello non LEETTTOOOOOOOO")
@@ -89,8 +89,8 @@ if __name__ == "__main__":
     best_val_loss = float("inf")
     best_path = RESULTS_DIR / "rnn_latest.pt"
     for epoch in range(n_epochs):
-        loss = train_rnn(model, train_loader, optimizer, criterion, device, hidden_size, hidden_layer)
-        loss_val = evaluate_rnn(model, val_loader, criterion, device, hidden_size, hidden_layer)
+        loss = train_rnn(model, train_loader, optimizer, criterion, device)
+        loss_val = evaluate_rnn(model, val_loader, criterion, device)
         if loss_val < best_val_loss:
             best_val_loss = loss_val
             torch.save(model.state_dict(), best_path)
